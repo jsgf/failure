@@ -18,6 +18,7 @@ macro_rules! with_std { ($($i:item)*) => ($(#[cfg(feature = "std")]$i)*) }
 macro_rules! without_std { ($($i:item)*) => ($(#[cfg(not(feature = "std"))]$i)*) }
 
 mod backtrace;
+mod chain;
 mod compat;
 mod context;
 mod result_ext;
@@ -26,6 +27,7 @@ use core::any::TypeId;
 use core::fmt::{Debug, Display};
 
 pub use backtrace::Backtrace;
+pub use chain::Chain;
 pub use compat::Compat;
 pub use context::Context;
 pub use result_ext::ResultExt;
@@ -49,7 +51,7 @@ with_std! {
 
     use std::error::Error as StdError;
 
-    pub use error::Error;
+    pub use error::{FailError, Error};
 
     mod macros;
     mod error_message;

@@ -153,9 +153,64 @@ impl Debug for Error {
     }
 }
 
+/// A wrapper for an `Error` which implements `Fail`.
+#[derive(Debug)]
+pub struct FailError(Error);
+
+impl FailError {
+    /// Constructs a `FailError` from anything that implements `Fail`.
+    /// It wraps the fail type in `Error`.
+    pub fn new<F: Fail>(f: F) -> Self {
+        let e = Error::from(f);
+        Self::from(e)
+    }
+
+    /// Return the inner `Error` object.
+    pub fn into_inner(self) -> Error {
+        self.0
+    }
+}
+
+impl From<Error> for FailError {
+    fn from(e: Error) -> Self {
+        FailError(e)
+    }
+}
+
+impl Display for FailError {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        Display::fmt(&self.0, fmt)
+    }
+}
+
+impl Fail for FailError {
+    fn cause(&self) -> Option<&Fail> {
+        self.0.cause().cause()
+    }
+
+    fn backtrace(&self) -> Option<&Backtrace> {
+        Some(self.0.backtrace())
+    }
+
+    fn context<D>(self, context: D) -> Context<D>
+    where
+        D: Display + Send + Sync + 'static,
+    {
+        self.0.context(context)
+    }
+
+    fn compat(self) -> Compat<Self> {
+        Compat { error: self }
+    }
+
+    fn root_cause(&self) -> &Fail {
+        self.0.root_cause()
+    }
+}
+
 #[cfg(test)]
 mod test {
-    fn assert_just_data<T: Send + Sync + 'static>() { }
+    fn assert_just_data<T: Send + Sync + 'static>() {}
 
     #[test]
     fn assert_error_is_just_data() {
