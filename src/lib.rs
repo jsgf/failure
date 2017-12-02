@@ -202,6 +202,16 @@ impl Fail {
     }
 }
 
+impl Fail for Box<Fail> {
+    fn cause(&self) -> Option<&Fail> {
+        self.as_ref().cause()
+    }
+
+    fn backtrace(&self) -> Option<&Backtrace> {
+        self.as_ref().backtrace()
+    }
+}
+
 #[cfg(feature = "std")]
 impl<E: StdError + Send + Sync + 'static> Fail for E {}
 
